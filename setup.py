@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="pyloss",
+    name="losspy",
     packages=find_packages(),
     version="0.1.0",
     license="MIT",
