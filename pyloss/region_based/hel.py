@@ -61,7 +61,7 @@ class HEL(nn.Module):
         return reduce_loss(loss, self.reduction)
 
 
-def hel(logits, gts, eps=1e-6, reduction="mean"):
+def cal_hel(logits, gts, eps=1e-6, reduction="mean"):
     """
     https://github.com/lartpang/HDFNet/blob/master/loss/HEL.py
 
