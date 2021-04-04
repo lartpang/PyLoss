@@ -118,7 +118,6 @@ if __name__ == "__main__":
     print(torch.all(torch.isclose(b, c1)))
     print(torch.all(torch.isclose(b, d)))
     print(torch.all(torch.isclose(b, e)))
-    # print((c - b).sum(), (d - c).sum())
     # 0.31998324394226074
     # 0.03971743583679199
     # 0.028532743453979492
