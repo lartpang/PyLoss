@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from pyloss.utils.misc import check_args, reduce_score
+from ..utils.misc import check_args, reduce_score
 
 
 def gaussian(window_size, sigma):

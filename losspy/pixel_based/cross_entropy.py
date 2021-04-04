@@ -6,7 +6,7 @@
 from torch import nn
 from torch.nn.functional import binary_cross_entropy_with_logits, cross_entropy
 
-from pyloss.utils.misc import check_args, reduce_loss
+from ..utils.misc import check_args, reduce_loss
 
 
 @check_args

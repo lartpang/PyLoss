@@ -3,7 +3,7 @@
 # @Author  : Lart Pang
 # @GitHub  : https://github.com/lartpang
 
-from pyloss.utils.misc import check_args, reduce_loss
+from ..utils.misc import check_args, reduce_loss
 
 
 def _cal_dice_loss(probs, gts, smooth_factor: int = 1):

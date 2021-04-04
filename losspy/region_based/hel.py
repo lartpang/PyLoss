@@ -6,7 +6,7 @@
 from torch import nn
 from torch.nn.functional import avg_pool2d
 
-from pyloss.utils.misc import reduce_loss
+from ..utils.misc import reduce_loss
 
 
 class HEL(nn.Module):

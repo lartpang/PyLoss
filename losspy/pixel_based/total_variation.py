@@ -3,7 +3,7 @@
 # @Author  : Lart Pang
 # @GitHub  : https://github.com/lartpang
 
-from pyloss.utils.misc import check_args, reduce_loss
+from ..utils.misc import check_args, reduce_loss
 
 
 @check_args
