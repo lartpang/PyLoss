@@ -72,7 +72,9 @@ def bhw_to_onehot_by_scatter_V1(bhw_tensor: torch.Tensor, num_classes: int):
     assert bhw_tensor.ndim == 3, bhw_tensor.shape
     assert num_classes > bhw_tensor.max(), torch.unique(bhw_tensor)
     # self[i][j][k][index[i][j][k][l]] = value  # 实际上就是便利了index的所有元素，用其索引调整self
-    one_hot = torch.zeros(size=(*bhw_tensor.shape, num_classes)).scatter_(dim=-1, index=bhw_tensor[..., None], value=1)
+    one_hot = torch.zeros(size=(*bhw_tensor.shape, num_classes)).scatter_(
+        dim=-1, index=bhw_tensor[..., None], value=1
+    )
     return one_hot
 
 

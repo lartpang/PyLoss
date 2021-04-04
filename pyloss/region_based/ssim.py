@@ -1,15 +1,19 @@
+# -*- coding: utf-8 -*-
 # https://github.com/Po-Hsun-Su/pytorch-ssim/blob/master/pytorch_ssim
 # /__init__.py
 from math import exp
 
 import torch
-import torch.nn.functional as F
-from pyloss.utils.misc import check_args, reduce_score
 import torch.nn as nn
+import torch.nn.functional as F
+
+from pyloss.utils.misc import check_args, reduce_score
 
 
 def gaussian(window_size, sigma):
-    gauss = torch.Tensor([exp(-((x - window_size // 2) ** 2) / float(2 * sigma ** 2)) for x in range(window_size)])
+    gauss = torch.Tensor(
+        [exp(-((x - window_size // 2) ** 2) / float(2 * sigma ** 2)) for x in range(window_size)]
+    )
     return gauss / gauss.sum()
 
 
@@ -53,14 +57,20 @@ class SSIM(nn.Module):
         mu2_sq = mu2.pow(2)
         mu1_mu2 = mu1 * mu2
 
-        sigma1_sq = F.conv2d(img1 * img1, window, padding=window_size // 2, groups=channel) - mu1_sq
-        sigma2_sq = F.conv2d(img2 * img2, window, padding=window_size // 2, groups=channel) - mu2_sq
+        sigma1_sq = (
+            F.conv2d(img1 * img1, window, padding=window_size // 2, groups=channel) - mu1_sq
+        )
+        sigma2_sq = (
+            F.conv2d(img2 * img2, window, padding=window_size // 2, groups=channel) - mu2_sq
+        )
         sigma12 = F.conv2d(img1 * img2, window, padding=window_size // 2, groups=channel) - mu1_mu2
 
         C1 = 0.01 ** 2
         C2 = 0.03 ** 2
 
-        ssim_map = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / ((mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2))
+        ssim_map = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / (
+            (mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2)
+        )
         return ssim_map.mean((1, 2, 3))
 
 
@@ -97,14 +107,20 @@ class LOGSSIM(nn.Module):
         mu2_sq = mu2.pow(2)
         mu1_mu2 = mu1 * mu2
 
-        sigma1_sq = F.conv2d(img1 * img1, window, padding=window_size // 2, groups=channel) - mu1_sq
-        sigma2_sq = F.conv2d(img2 * img2, window, padding=window_size // 2, groups=channel) - mu2_sq
+        sigma1_sq = (
+            F.conv2d(img1 * img1, window, padding=window_size // 2, groups=channel) - mu1_sq
+        )
+        sigma2_sq = (
+            F.conv2d(img2 * img2, window, padding=window_size // 2, groups=channel) - mu2_sq
+        )
         sigma12 = F.conv2d(img1 * img2, window, padding=window_size // 2, groups=channel) - mu1_mu2
 
         C1 = 0.01 ** 2
         C2 = 0.03 ** 2
 
-        ssim_map = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / ((mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2))
+        ssim_map = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / (
+            (mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2)
+        )
         ssim_map = (ssim_map - torch.min(ssim_map)) / (torch.max(ssim_map) - torch.min(ssim_map))
         ssim_map = -torch.log(ssim_map + eps)
         return ssim_map.mean((1, 2, 3))

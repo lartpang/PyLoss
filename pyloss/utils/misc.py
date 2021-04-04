@@ -48,7 +48,9 @@ def check_args(func):
                 and gts.shape[1] == 1
                 and isinstance(gts, (torch.BoolTensor, torch.IntTensor, torch.LongTensor))
             ):
-                raise ValueError("Only support N,1,H,W gts(torch.BoolTensor, torch.IntTensor, torch.LongTensor).")
+                raise ValueError(
+                    "Only support N,1,H,W gts(torch.BoolTensor, torch.IntTensor, torch.LongTensor)."
+                )
             if preds.shape[2:] != gts.shape[2:]:
                 raise ValueError("Preds and gts must have the same size.")
             if not 1 <= preds.shape[1] <= gts.max():
