@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 setup(
     name="losspy",
     packages=find_packages(),
-    version="0.1.0",
+    version="0.1.1",
     license="MIT",
     description="Some loss functions for deep learning.",
     long_description=long_description,
