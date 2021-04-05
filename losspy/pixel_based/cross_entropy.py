@@ -2,7 +2,7 @@
 # @Time    : 2020/10/22
 # @Author  : Lart Pang
 # @GitHub  : https://github.com/lartpang
-
+import torch
 from torch import nn
 from torch.nn.functional import binary_cross_entropy_with_logits, cross_entropy
 
@@ -10,25 +10,25 @@ from ..utils.misc import check_args, reduce_loss
 
 
 @check_args
-def cal_bce_loss(preds, gts, reduction="mean"):
+def cal_bce_loss(logits, gts, reduction="mean"):
     """
-    :param preds: (N,C,H,W) logits predicted by the model.
+    :param logits: (N,C,H,W) logits predicted by the model.
     :param gts: (N,1,H,W) ground truths.
     :param reduction: specifies how all element-level loss is handled.
     :return: bce loss
     """
-    return binary_cross_entropy_with_logits(input=preds, target=gts, reduction=reduction)
+    return binary_cross_entropy_with_logits(input=logits, target=gts, reduction=reduction)
 
 
 @check_args
-def cal_ce_loss(preds, gts, reduction="mean"):
+def cal_ce_loss(logits, gts, reduction="mean"):
     """
-    :param preds: (N,C,H,W) logits predicted by the model.
+    :param logits: (N,C,H,W) logits predicted by the model.
     :param gts: (N,1,H,W) ground truths.
     :param reduction: specifies how all element-level loss is handled.
     :return: ce loss
     """
-    return cross_entropy(input=preds, target=gts, reduction=reduction)
+    return cross_entropy(input=logits, target=gts, reduction=reduction)
 
 
 @check_args
@@ -88,19 +88,20 @@ class OHEMBCELoss(nn.Module):
         bce_loss = binary_cross_entropy_with_logits(logits, gts, reduction="none")
         flatten_bce_loss = bce_loss.reshape(-1)
 
-        if self.threshold is None:
-            # for high loss
-            sorted_loss, indices = flatten_bce_loss.sort(descending=True)  # large -> small
-            # select the largest loss
-            loss_indices = indices[:batch_min_kept_numel]
-        else:
-            # 0&1: has the largest certainty, 0.5: has the smallest one
-            confidence = (logits.sigmoid() - 0.5).abs() * 2
-            sorted_conf, indices = confidence.reshape(-1).sort()  # small -> large
-            min_threshold = sorted_conf[min(batch_min_kept_numel, sorted_conf.numel() - 1)]
-            threshold = max(min_threshold, self.threshold)
-            # select the largest loss
-            loss_indices = indices[sorted_conf < threshold]
+        with torch.no_grad():
+            if self.threshold is None:
+                # for high loss
+                sorted_loss, indices = flatten_bce_loss.sort(descending=True)  # large -> small
+                # select the largest loss
+                loss_indices = indices[:batch_min_kept_numel]
+            else:
+                # 0&1: has the largest certainty, 0.5: has the smallest one
+                confidence = (logits.sigmoid() - 0.5).abs() * 2
+                sorted_conf, indices = confidence.reshape(-1).sort()  # small -> large
+                min_threshold = sorted_conf[min(batch_min_kept_numel, sorted_conf.numel() - 1)]
+                final_threshold = max(min_threshold, self.threshold)
+                # select the largest loss
+                loss_indices = indices[sorted_conf < final_threshold]
         loss = flatten_bce_loss[loss_indices]
         return reduce_loss(loss, self.reduction)
 
@@ -125,18 +126,19 @@ def cal_ohembce_loss(logits, gts, threshold=None, min_kept_numel=100000, reducti
     bce_loss = binary_cross_entropy_with_logits(logits, gts, reduction="none")
     flatten_bce_loss = bce_loss.reshape(-1)
 
-    if threshold is None:
-        # for high loss
-        sorted_loss, indices = flatten_bce_loss.sort(descending=True)  # large -> small
-        # select the largest loss
-        loss_indices = indices[:batch_min_kept_numel]
-    else:
-        # 0&1: has the largest certainty, 0.5: has the smallest one
-        confidence = (logits.sigmoid() - 0.5).abs() * 2
-        sorted_conf, indices = confidence.reshape(-1).sort()  # small -> large
-        min_threshold = sorted_conf[min(batch_min_kept_numel, sorted_conf.numel() - 1)]
-        threshold = max(min_threshold, threshold)
-        # select the largest loss
-        loss_indices = indices[sorted_conf < threshold]
+    with torch.no_grad():
+        if threshold is None:
+            # for high loss
+            sorted_loss, indices = flatten_bce_loss.sort(descending=True)  # large -> small
+            # select the largest loss
+            loss_indices = indices[:batch_min_kept_numel]
+        else:
+            # 0&1: has the largest certainty, 0.5: has the smallest one
+            confidence = (logits.sigmoid() - 0.5).abs() * 2
+            sorted_conf, indices = confidence.reshape(-1).sort()  # small -> large
+            min_threshold = sorted_conf[min(batch_min_kept_numel, sorted_conf.numel() - 1)]
+            final_threshold = max(min_threshold, threshold)
+            # select the largest loss
+            loss_indices = indices[sorted_conf < final_threshold]
     loss = flatten_bce_loss[loss_indices]
     return reduce_loss(loss, reduction)

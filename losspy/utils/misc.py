@@ -39,23 +39,23 @@ def check_args(func):
     """
 
     @wraps(func)
-    def wrapper(preds, gts=None, **kwargs):
-        if not (preds.ndim == 4 and isinstance(preds, torch.FloatTensor)):
-            raise ValueError("Only support N,C,H,W preds(FloatTensor)")
+    def wrapper(logits, gts=None, **kwargs):
+        if logits.ndim != 4:
+            raise ValueError(
+                f"Only support N,C,H,W logits, but get {logits.shape} and {logits.type()}"
+            )
         if gts is not None:
-            if not (
-                gts.ndim == 4
-                and gts.shape[1] == 1
-                and isinstance(gts, (torch.BoolTensor, torch.IntTensor, torch.LongTensor))
-            ):
+            if gts.ndim != 4 or gts.shape[1] != 1:
+                raise ValueError(f"Only support N,1,H,W gts, but get {gts.shape} and {gts.type()}")
+            if logits.shape[0] != gts.shape[0] or logits.shape[2:] != gts.shape[2:]:
                 raise ValueError(
-                    "Only support N,1,H,W gts(torch.BoolTensor, torch.IntTensor, torch.LongTensor)."
+                    f"Logits {logits.shape} and gts {gts.shape} must have the same size."
                 )
-            if preds.shape[2:] != gts.shape[2:]:
-                raise ValueError("Preds and gts must have the same size.")
-            if not 1 <= preds.shape[1] <= gts.max():
-                raise ValueError("The num_classes of preds is not compatible with the one of gts.")
-        return func(preds, gts, **kwargs)
+            if not 1 <= logits.shape[1] <= gts.max():
+                raise ValueError(
+                    "The num_classes of logits is not compatible with the one of gts."
+                )
+        return func(logits, gts, **kwargs)
 
     return wrapper
 

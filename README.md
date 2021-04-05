@@ -24,3 +24,7 @@
 ```
 
 Some loss functions for deeplearning.
+
+```python
+pip install losspy
+```
